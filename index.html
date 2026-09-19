@@ -13,7 +13,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
 
-  <!-- Modal หน้า Login -->
+  <!-- Modal หน้า Login (ดึงข้อมูลจาก Sheet user ผ่าน API) -->
   <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden p-6 border border-slate-100">
       <div class="text-center mb-6">
@@ -23,13 +23,13 @@
           </svg>
         </div>
         <h2 class="text-2xl font-bold text-slate-800">เข้าสู่ระบบ TrackingJob</h2>
-        <p class="text-xs text-slate-500 mt-1">กรุณากรอก Username และ Password เพื่อเข้าใช้งาน</p>
+        <p class="text-xs text-slate-500 mt-1">กรุณากรอก Username และ Password จากระบบ</p>
       </div>
 
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-medium text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username / Name)</label>
-          <input type="text" id="loginUsername" required placeholder="เช่น ฉัตรชัย" 
+          <input type="text" id="loginUsername" required placeholder="กรอก Username เช่น 11111111" 
                  class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
         </div>
 
@@ -43,7 +43,7 @@
           ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง!
         </div>
 
-        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm shadow transition-all">
+        <button type="submit" id="loginBtn" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm shadow transition-all">
           เข้าสู่ระบบ
         </button>
       </form>
@@ -205,14 +205,6 @@
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPk6LFD1uxljIuVzpjprq41GZbFekaGmGtcO99d9gMcl6jlIIOtoGYgWuMJF98vv4C/exec';
 
-    // ข้อมูลผู้ใช้งานจาก Sheet User
-    const USERS_DATABASE = [
-      { name: "ฉัตรชัย", username: "11111111", password: "11111111", role: "Admin", status: "Activated" },
-      { name: "ศรานนท์", username: "22222222", password: "22222222", role: "User", status: "Activated" },
-      { name: "จิรวัฒณ์", username: "33333333", password: "33333333", role: "User", status: "Activated" },
-      { name: "ชัยวัตน์", username: "44444444", password: "44444444", role: "User", status: "Activated" }
-    ];
-
     let currentUser = null;
     let allJobs = [];
     let isGroupByAssignee = true; // ค่าเริ่มต้นเรียงตามผู้รับผิดชอบ
@@ -221,25 +213,46 @@
       checkLoginSession();
     });
 
-    // 1. ระบบ Login & Session
-    function handleLogin(e) {
+    // 1. ระบบ Login (ยิงเช็คกับ Sheet user ผ่าน Google Apps Script)
+    async function handleLogin(e) {
       e.preventDefault();
-      const u = document.getElementById('loginUsername').value.trim();
-      const p = document.getElementById('loginPassword').value.trim();
+      const usernameInput = document.getElementById('loginUsername').value.trim();
+      const passwordInput = document.getElementById('loginPassword').value.trim();
+      const errorDiv = document.getElementById('loginError');
+      const loginBtn = document.getElementById('loginBtn');
 
-      const user = USERS_DATABASE.find(item => 
-        (item.username === u || item.name === u) && item.password === p && item.status === 'Activated'
-      );
+      errorDiv.classList.add('hidden');
+      loginBtn.disabled = true;
+      loginBtn.innerText = 'กำลังตรวจสอบ...';
 
-      if (user) {
-        currentUser = user;
-        localStorage.setItem('trackingJobUser', JSON.stringify(user));
-        document.getElementById('loginModal').classList.add('hidden');
-        document.getElementById('loginError').classList.add('hidden');
-        updateUserUI();
-        fetchJobs();
-      } else {
-        document.getElementById('loginError').classList.remove('hidden');
+      try {
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'login',
+            username: usernameInput,
+            password: passwordInput
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          currentUser = result.user;
+          localStorage.setItem('trackingJobUser', JSON.stringify(currentUser));
+          document.getElementById('loginModal').classList.add('hidden');
+          updateUserUI();
+          fetchJobs();
+        } else {
+          errorDiv.innerText = result.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!';
+          errorDiv.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorDiv.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+        errorDiv.classList.remove('hidden');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerText = 'เข้าสู่ระบบ';
       }
     }
 
@@ -323,7 +336,6 @@
       }
 
       if (isGroupByAssignee) {
-        // จัดกลุ่มงานตามชื่อ Assignee
         const grouped = {};
         jobsList.forEach(job => {
           const assignee = job.Assignee || 'ไม่ระบุผู้รับผิดชอบ';
