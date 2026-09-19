@@ -3,30 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบติดตามงาน (Tracking Job Board)</title>
-  <!-- Tailwind CSS สำหรับตกแต่ง UI -->
+  <title>Tracking Job System</title>
+  <!-- HTML5 + Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Prompt -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-slate-100 min-h-screen">
 
   <!-- ========================================== -->
-  <!-- 1. หน้าจอ LOGIN                            -->
+  <!-- 1. LOGIN SECTION (หน้าเข้าสู่ระบบเดิม)       -->
   <!-- ========================================== -->
   <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
-      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">🔐 เข้าสู่ระบบ Tracking Job</h2>
-      
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-slate-800">📌 Tracking Job</h1>
+        <p class="text-slate-500 text-sm mt-1">เข้าสู่ระบบเพื่อจัดการรายการงาน</p>
+      </div>
+
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Username</label>
-          <input type="text" id="loginUsername" class="mt-1 w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+          <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
+          <input type="text" id="loginUsername" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" required placeholder="ระบุ Username">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Password</label>
-          <input type="password" id="loginPassword" class="mt-1 w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+          <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน (Password)</label>
+          <input type="password" id="loginPassword" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" required placeholder="ระบุ Password">
         </div>
-        
-        <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition">
+
+        <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg shadow transition duration-200">
           เข้าสู่ระบบ
         </button>
       </form>
@@ -34,102 +42,126 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. หน้าหลัก DASHBOARD & JOB BOARD            -->
+  <!-- 2. DASHBOARD SECTION (หน้าหลักเดิม)         -->
   <!-- ========================================== -->
-  <div id="appSection" class="hidden p-4 md:p-6 max-w-7xl mx-auto">
+  <div id="appSection" class="hidden">
     
-    <!-- Header & User Info -->
-    <div class="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow mb-6 gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">📌 ระบบติดตามงาน (Tracking Job Board)</h1>
-        <p class="text-sm text-gray-500">ยินดีต้อนรับ, <span id="currentUserDisplay" class="font-bold text-indigo-600">-</span> (<span id="currentRoleDisplay">-</span>)</p>
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <span class="text-xl font-bold text-indigo-600">📌 Tracking Job</span>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+              <p id="currentUserDisplay" class="text-sm font-semibold text-slate-800">-</p>
+              <p id="currentRoleDisplay" class="text-xs text-slate-500">-</p>
+            </div>
+            <button onclick="handleLogout()" class="text-slate-500 hover:text-red-600 font-medium text-sm px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition">
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="flex gap-2">
-        <button onclick="openCreateModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition text-sm flex items-center gap-1">
-          ➕ สร้างงานใหม่
-        </button>
-        <button onclick="handleLogout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-2 rounded-lg transition text-sm">
-          ออกจากระบบ
-        </button>
-      </div>
-    </div>
+    </nav>
 
-    <!-- พื้นที่แสดงการ์ดรายการงาน -->
-    <div id="jobList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Cards จะถูกเรนเดอร์ผ่าน JavaScript -->
-    </div>
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      
+      <!-- Action Bar Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">รายการงานทั้งหมด</h2>
+          <p class="text-xs text-slate-500 mt-0.5">*งานที่ยังไม่ระบุคนจะถูกแสดงไว้ที่ด้านบนสุด</p>
+        </div>
+
+        <button onclick="openCreateModal()" class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition text-sm">
+          <span>➕</span> สร้างงานใหม่
+        </button>
+      </div>
+
+      <!-- Job Cards Grid Container -->
+      <div id="jobList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Cards จะถูกเรนเดอร์ผ่าน JavaScript -->
+      </div>
+
+    </main>
   </div>
 
   <!-- ========================================== -->
-  <!-- 3. MODAL EDIT / CREATE FORM                -->
+  <!-- 3. MODAL EDIT / CREATE FORM (พร้อมรูปแนบ)    -->
   <!-- ========================================== -->
-  <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+  <div id="jobModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
       
-      <!-- ปุ่มปิด Modal -->
-      <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+      <!-- Close Button -->
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
       
-      <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4">✏️ แก้ไขรายการงาน</h2>
+      <h3 id="modalTitle" class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b">✏️ แก้ไขรายการงาน</h3>
 
       <form id="jobForm" onsubmit="saveJob(event)" class="space-y-4">
         <input type="hidden" id="editJobId">
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">หัวข้องาน</label>
-          <input type="text" id="editTitle" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">หัวข้องาน</label>
+          <input type="text" id="editTitle" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700">ผู้แจ้งงาน (Requester)</label>
-          <input type="text" id="editRequester" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">ผู้รับผิดชอบ (Assignee)</label>
-          <input type="text" id="editAssignee" placeholder="หากยังไม่มีให้ใส่ 'ไม่ระบุ' หรือเว้นว่าง" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700">สถานะ</label>
-            <select id="editStatus" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้แจ้งงาน (Requester)</label>
+            <input type="text" id="editRequester" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้รับผิดชอบ (Assignee)</label>
+            <input type="text" id="editAssignee" placeholder="ไม่ระบุ" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">สถานะ</label>
+            <select id="editStatus" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700">กำหนดเสร็จ</label>
-            <input type="date" id="editDueDate" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">กำหนดส่ง (Due Date)</label>
+            <input type="date" id="editDueDate" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">รายละเอียดงาน</label>
-          <textarea id="editDetails" rows="3" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียดงาน</label>
+          <textarea id="editDetails" rows="3" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
         </div>
 
-        <!-- 🖼️ ส่วนแสดงและอัปโหลดรูปภาพแนบใน Modal -->
-        <div class="border-t pt-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">🖼️ รูปภาพประกอบ</label>
+        <!-- 🖼️ รูปภาพประกอบ แสดงใน Modal นี้เท่านั้น -->
+        <div class="border-t border-slate-100 pt-3">
+          <label class="block text-xs font-semibold text-slate-700 mb-2">🖼️ รูปภาพประกอบ</label>
           
-          <!-- แสดง Preview รูปภาพเดิม (ถ้ามี) -->
+          <!-- แสดง Preview รูปเดิม -->
           <div id="imagePreviewContainer" class="hidden mb-3">
-            <img id="editImagePreview" src="" alt="รูปแนบ" class="w-full h-48 object-cover rounded-lg border">
+            <img id="editImagePreview" src="" alt="รูปประกอบ" class="w-full h-48 object-cover rounded-xl border border-slate-200 shadow-sm">
           </div>
 
-          <!-- ช่องเลือกอัปโหลดรูปใหม่ -->
-          <input type="file" id="editImageFile" accept="image/*" onchange="previewSelectedImage(event)" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+          <!-- Input สำหรับอัปโหลด/เปลี่ยนรูปใหม่ -->
+          <input type="file" id="editImageFile" accept="image/*" onchange="previewSelectedImage(event)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
         </div>
 
-        <div class="flex justify-between gap-2 pt-4 border-t">
-          <button type="button" id="deleteBtn" onclick="confirmDeleteJob()" class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-bold hidden">
-            🗑️ ลบงาน
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+          <button type="button" id="deleteBtn" onclick="confirmDeleteJob()" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-semibold text-xs transition hidden">
+            🗑️ ลบงานนี้
           </button>
           
           <div class="flex gap-2 ml-auto">
-            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">ยกเลิก</button>
-            <button type="submit" id="saveBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold">บันทึกข้อมูล</button>
+            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 text-xs font-medium">ยกเลิก</button>
+            <button type="submit" id="saveBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xs font-semibold shadow-sm transition">บันทึกข้อมูล</button>
           </div>
         </div>
       </form>
@@ -141,15 +173,13 @@
   <!-- 4. JAVASCRIPT LOGIC                        -->
   <!-- ========================================== -->
   <script>
-    // ⚠️ ใส่ Web App URL ที่ได้จาก Google Apps Script (Code.gs)
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPk6LFD1uxljIuVzpjprq41GZbFekaGmGtcO99d9gMcl6jlIIOtoGYgWuMJF98vv4C/exec';
+    // URL Web App จาก Google Apps Script (Code.gs)
+    const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
 
     let allJobs = [];
     let currentUser = null;
 
-    // ------------------------------------------
-    // 1. ระบบ LOGIN & LOGOUT
-    // ------------------------------------------
+    // 1. ระบบ Login & Logout
     async function handleLogin(e) {
       e.preventDefault();
       const usernameInput = document.getElementById('loginUsername').value;
@@ -176,7 +206,7 @@
           document.getElementById('loginSection').classList.add('hidden');
           document.getElementById('appSection').classList.remove('hidden');
 
-          fetchJobs(); // โหลดรายการงาน
+          fetchJobs();
         } else {
           alert('เข้าสู่ระบบไม่สำเร็จ: ' + result.message);
         }
@@ -196,9 +226,7 @@
       document.getElementById('loginSection').classList.remove('hidden');
     }
 
-    // ------------------------------------------
-    // 2. ดึงข้อมูลรายการงาน และเรียง Unassigned ขึ้นก่อน
-    // ------------------------------------------
+    // 2. ดึงข้อมูลรายการงาน และ จัดเรียง Unassigned ขึ้นก่อน
     async function fetchJobs() {
       try {
         const response = await fetch(WEB_APP_URL);
@@ -217,7 +245,7 @@
       const jobListContainer = document.getElementById('jobList');
       jobListContainer.innerHTML = '';
 
-      // จัดเรียง: งานที่ไม่ระบุคน (Unassigned) ขึ้นมาด้านบนสุดก่อน
+      // 📌 จัดเรียง: ให้ Unassigned (ไม่ระบุคน) ขึ้นมาอยู่ด้านบนสุด
       const sortedJobs = [...allJobs].sort((a, b) => {
         const assigneeA = (a.Assignee || '').trim();
         const assigneeB = (b.Assignee || '').trim();
@@ -236,28 +264,33 @@
         const hasImage = job.Image_URL && job.Image_URL.trim() !== '';
 
         const card = document.createElement('div');
-        card.className = `bg-white p-4 rounded-xl shadow border-l-4 ${isUnassigned ? 'border-red-500 bg-red-50/20' : 'border-indigo-500'} hover:shadow-md transition`;
+        card.className = `bg-white rounded-xl shadow-sm border ${isUnassigned ? 'border-red-300 bg-red-50/20' : 'border-slate-200'} p-5 hover:shadow-md transition flex flex-col justify-between`;
 
         card.innerHTML = `
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-bold px-2 py-1 bg-gray-100 text-gray-700 rounded">${job.Job_ID}</span>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${getStatusBadgeClass(job.Status)}">${job.Status}</span>
-          </div>
-
-          <h3 class="font-bold text-gray-800 text-base mb-2 line-clamp-2">${job.Title}</h3>
-          
-          <div class="text-sm text-gray-600 mb-3 space-y-1">
-            <p>👤 ผู้รับผิดชอบ: <span class="${isUnassigned ? 'text-red-500 font-bold' : 'font-medium'}">${isUnassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
-            ${job.DueDate ? `<p class="text-xs text-gray-500">📅 กำหนดส่ง: ${job.DueDate}</p>` : ''}
-          </div>
-
-          <div class="flex justify-between items-center pt-3 border-t text-xs">
-            <!-- ซ่อนรูปภาพในการ์ด แสดงเฉพาะป้ายบอกว่ามีรูปแนบหรือไม่ -->
-            <div>
-              ${hasImage ? '<span class="inline-flex items-center gap-1 text-indigo-600 bg-indigo-50 px-2 py-1 rounded border border-indigo-200">🖼️ มีรูปแนบ</span>' : '<span class="text-gray-400">ไม่มีรูป</span>'}
+          <div>
+            <div class="flex justify-between items-start mb-3">
+              <span class="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">${job.Job_ID}</span>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${getStatusBadgeClass(job.Status)}">${job.Status}</span>
             </div>
 
-            <button onclick="openEditModal('${job.Job_ID}')" class="text-indigo-600 hover:text-indigo-800 font-bold underline">
+            <h3 class="font-bold text-slate-800 text-base mb-2 line-clamp-2">${job.Title}</h3>
+            
+            <div class="text-xs text-slate-600 space-y-1 mb-4">
+              <p>👤 ผู้รับผิดชอบ: <span class="${isUnassigned ? 'text-red-500 font-bold' : 'font-medium text-slate-800'}">${isUnassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
+              ${job.Requester ? `<p class="text-slate-500">🙋‍♂️ ผู้แจ้ง: ${job.Requester}</p>` : ''}
+              ${job.DueDate ? `<p class="text-slate-500">📅 กำหนดส่ง: ${job.DueDate}</p>` : ''}
+            </div>
+          </div>
+
+          <!-- Bottom Footer ของ Card -->
+          <div class="flex justify-between items-center pt-3 border-t border-slate-100 text-xs">
+            <!-- ซ่อนรูปภาพในการ์ด แสดงเฉพาะป้ายไอคอนบอกว่ามีรูปแนบหรือไม่ -->
+            <div>
+              ${hasImage ? '<span class="inline-flex items-center gap-1 text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 font-medium">🖼️ มีรูปแนบ</span>' : '<span class="text-slate-400">ไม่มีรูป</span>'}
+            </div>
+
+            <!-- ปุ่มกดเปิด Modal ดู/แก้ไขรูปภาพเต็ม -->
+            <button onclick="openEditModal('${job.Job_ID}')" class="text-indigo-600 hover:text-indigo-800 font-semibold underline">
               ✏️ ดู / แก้ไข
             </button>
           </div>
@@ -268,14 +301,12 @@
     }
 
     function getStatusBadgeClass(status) {
-      if (status === 'Completed') return 'bg-green-100 text-green-800';
-      if (status === 'In Progress') return 'bg-yellow-100 text-yellow-800';
-      return 'bg-gray-100 text-gray-800';
+      if (status === 'Completed') return 'bg-emerald-100 text-emerald-800';
+      if (status === 'In Progress') return 'bg-amber-100 text-amber-800';
+      return 'bg-slate-100 text-slate-700';
     }
 
-    // ------------------------------------------
-    // 3. MODAL EDIT & CREATE LOGIC
-    // ------------------------------------------
+    // 3. Modal Handlers & Base64 Image Preview
     function openCreateModal() {
       document.getElementById('jobForm').reset();
       document.getElementById('editJobId').value = '';
@@ -299,7 +330,6 @@
       document.getElementById('editDueDate').value = job.DueDate || '';
       document.getElementById('editDetails').value = job.Details || '';
 
-      // แสดงรูปภาพใน Modal (ถ้ามี)
       const imgPreviewContainer = document.getElementById('imagePreviewContainer');
       const imgPreview = document.getElementById('editImagePreview');
 
@@ -341,9 +371,7 @@
       });
     }
 
-    // ------------------------------------------
-    // 4. บันทึก (สร้าง / แก้ไข) และ ลบงาน
-    // ------------------------------------------
+    // 4. Save & Delete Job Logic
     async function saveJob(e) {
       e.preventDefault();
       
@@ -386,7 +414,7 @@
 
         if (result.status === 'success') {
           closeModal();
-          fetchJobs(); // โหลดรายการใหม่
+          fetchJobs();
         } else {
           alert('บันทึกไม่สำเร็จ: ' + result.message);
         }
