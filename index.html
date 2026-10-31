@@ -4,62 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tracking Job System</title>
-  <!-- HTML5 + Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Prompt -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Prompt', sans-serif; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body class="bg-slate-100 min-h-screen text-slate-800">
 
-  <!-- ========================================== -->
-  <!-- 1. LOGIN SECTION (หน้าเข้าสู่ระบบเดิม)       -->
-  <!-- ========================================== -->
+  <!-- ================= LOGIN SECTION ================= -->
   <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200">
       <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-slate-800">📌 Tracking Job</h1>
         <p class="text-slate-500 text-sm mt-1">เข้าสู่ระบบเพื่อจัดการรายการงาน</p>
       </div>
-
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
-          <input type="text" id="loginUsername" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" required placeholder="ระบุ Username">
+          <input type="text" id="loginUsername" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required placeholder="ระบุ Username">
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน (Password)</label>
-          <input type="password" id="loginPassword" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" required placeholder="ระบุ Password">
+          <input type="password" id="loginPassword" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required placeholder="ระบุ Password">
         </div>
-
-        <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg shadow transition duration-200">
+        <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow transition">
           เข้าสู่ระบบ
         </button>
       </form>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 2. DASHBOARD SECTION (หน้าหลักเดิม)         -->
-  <!-- ========================================== -->
-  <div id="appSection" class="hidden">
+  <!-- ================= DASHBOARD SECTION ================= -->
+  <div id="appSection" class="hidden pb-12">
     
-    <!-- Top Navigation Bar -->
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <span class="text-xl font-bold text-indigo-600">📌 Tracking Job</span>
-          </div>
-          
-          <div class="flex items-center gap-3">
+        <div class="flex justify-between h-16 items-center">
+          <span class="text-lg sm:text-xl font-bold text-indigo-600 truncate">📌 Tracking Job</span>
+          <div class="flex items-center gap-2 sm:gap-4">
             <div class="text-right hidden sm:block">
               <p id="currentUserDisplay" class="text-sm font-semibold text-slate-800">-</p>
               <p id="currentRoleDisplay" class="text-xs text-slate-500">-</p>
             </div>
-            <button onclick="handleLogout()" class="text-slate-500 hover:text-red-600 font-medium text-sm px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition">
+            <button onclick="handleLogout()" class="text-slate-500 hover:text-red-600 font-medium text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition">
               ออกจากระบบ
             </button>
           </div>
@@ -67,98 +56,148 @@
       </div>
     </nav>
 
-    <!-- Main Content Area -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
       
-      <!-- Action Bar Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 class="text-xl font-bold text-slate-800">รายการงานทั้งหมด</h2>
-          <p class="text-xs text-slate-500 mt-0.5">*งานที่ยังไม่ระบุคนจะถูกแสดงไว้ที่ด้านบนสุด</p>
+      <!-- Summary Cards Status -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div onclick="filterByStatus('ALL')" class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-slate-500">งานทั้งหมด</p>
+          <p id="countAll" class="text-xl sm:text-2xl font-bold mt-1 text-slate-800">0</p>
         </div>
+        <div onclick="filterByStatus('Pending')" class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-slate-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-slate-500">⏳ Pending</p>
+          <p id="countPending" class="text-xl sm:text-2xl font-bold mt-1 text-slate-700">0</p>
+        </div>
+        <div onclick="filterByStatus('In Progress')" class="bg-amber-50/50 p-3 sm:p-4 rounded-xl border border-amber-200 shadow-sm cursor-pointer hover:border-amber-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-amber-600">🔄 In Progress</p>
+          <p id="countInProgress" class="text-xl sm:text-2xl font-bold mt-1 text-amber-700">0</p>
+        </div>
+        <div onclick="filterByStatus('Completed')" class="bg-emerald-50/50 p-3 sm:p-4 rounded-xl border border-emerald-200 shadow-sm cursor-pointer hover:border-emerald-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-emerald-600">✅ Completed</p>
+          <p id="countCompleted" class="text-xl sm:text-2xl font-bold mt-1 text-emerald-700">0</p>
+        </div>
+      </div>
 
-        <button onclick="openCreateModal()" class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition text-sm">
+      <!-- 📊 พนักงาน Dashboard สรุปภาระงานรายบุคคล -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm mb-6">
+        <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-1.5">
+          <span>👥</span> สรุปภาระงานรายบุคคล (ยอดงานทั้งหมด / ค้างอยู่)
+        </h3>
+        <div id="assigneeStatsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+          <!-- เรนเดอร์สถิติต่อคนผ่าน JS -->
+        </div>
+      </div>
+
+      <!-- Action Bar Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-800">รายการงานทั้งหมด</h2>
+          <p class="text-[11px] sm:text-xs text-slate-500">*งานที่ยังไม่ระบุคนจะอยู่ด้านบนสุด</p>
+        </div>
+        <button onclick="openCreateModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition text-sm">
           <span>➕</span> สร้างงานใหม่
         </button>
       </div>
 
-      <!-- Job Cards Grid Container -->
-      <div id="jobList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Cards จะถูกเรนเดอร์ผ่าน JavaScript -->
+      <!-- Search & Filter Bar -->
+      <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">🔍</span>
+          <input type="text" id="searchInput" oninput="handleSearchAndFilter()" placeholder="ค้นหา Job ID, หัวข้อ, หรือผู้รับผิดชอบ..." class="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-medium text-slate-500 whitespace-nowrap">สถานะ:</span>
+          <select id="statusFilter" onchange="handleSearchAndFilter()" class="w-full sm:w-auto border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50">
+            <option value="ALL">ทั้งหมด</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
       </div>
+
+      <!-- Job Cards Grid -->
+      <div id="jobList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
     </main>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 3. MODAL EDIT / CREATE FORM (พร้อมรูปแนบ)    -->
-  <!-- ========================================== -->
-  <div id="jobModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+  <!-- ================= MODAL EDIT / CREATE ================= -->
+  <div id="jobModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 relative max-h-[95vh] overflow-y-auto">
       
-      <!-- Close Button -->
       <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
       
-      <h3 id="modalTitle" class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b">✏️ แก้ไขรายการงาน</h3>
+      <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-4 pb-2 border-b">✏️ แก้ไขรายการงาน</h3>
 
       <form id="jobForm" onsubmit="saveJob(event)" class="space-y-4">
         <input type="hidden" id="editJobId">
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">หัวข้องาน</label>
-          <input type="text" id="editTitle" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
+          <input type="text" id="editTitle" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้แจ้งงาน (Requester)</label>
-            <input type="text" id="editRequester" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <input type="text" id="editRequester" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้รับผิดชอบ (Assignee)</label>
-            <input type="text" id="editAssignee" placeholder="ไม่ระบุ" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">กำหนดส่ง (Due Date)</label>
+            <input type="date" id="editDueDate" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <!-- 👤 เลือกผู้รับผิดชอบหลายคน (Checkbox) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-2">👤 ผู้รับผิดชอบ (เลือกได้มากกว่า 1 คน)</label>
+          <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+              <input type="checkbox" name="assigneeCheckbox" value="ฉัตรชัย" class="w-4 h-4 text-indigo-600 rounded"> ฉัตรชัย
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+              <input type="checkbox" name="assigneeCheckbox" value="ศรานนท์" class="w-4 h-4 text-indigo-600 rounded"> ศรานนท์
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+              <input type="checkbox" name="assigneeCheckbox" value="จิรวัฒณ์" class="w-4 h-4 text-indigo-600 rounded"> จิรวัฒณ์
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+              <input type="checkbox" name="assigneeCheckbox" value="ชัยวัตน์" class="w-4 h-4 text-indigo-600 rounded"> ชัยวัตน์
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">สถานะ</label>
-            <select id="editStatus" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <select id="editStatus" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">กำหนดส่ง (Due Date)</label>
-            <input type="date" id="editDueDate" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียดงาน</label>
-          <textarea id="editDetails" rows="3" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+          <textarea id="editDetails" rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
         </div>
 
-        <!-- 🖼️ รูปภาพประกอบ แสดงใน Modal นี้เท่านั้น -->
+        <!-- Image Upload & Preview -->
         <div class="border-t border-slate-100 pt-3">
-          <label class="block text-xs font-semibold text-slate-700 mb-2">🖼️ รูปภาพประกอบ</label>
-          
-          <!-- แสดง Preview รูปเดิม -->
+          <label class="block text-xs font-semibold text-slate-700 mb-2">🖼️ รูปภาพประกอบ (ย่อขนาดอัตโนมัติ)</label>
           <div id="imagePreviewContainer" class="hidden mb-3">
-            <img id="editImagePreview" src="" alt="รูปประกอบ" class="w-full h-48 object-cover rounded-xl border border-slate-200 shadow-sm">
+            <img id="editImagePreview" src="" alt="รูปประกอบ" class="w-full h-40 sm:h-48 object-cover rounded-xl border border-slate-200 shadow-sm">
           </div>
-
-          <!-- Input สำหรับอัปโหลด/เปลี่ยนรูปใหม่ -->
           <input type="file" id="editImageFile" accept="image/*" onchange="previewSelectedImage(event)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+          <p id="compressStatus" class="text-[10px] text-indigo-600 font-medium mt-1 hidden">⚡ กำลังย่อขนาดรูปภาพ...</p>
         </div>
 
-        <!-- Action Buttons -->
         <div class="flex justify-between items-center pt-4 border-t border-slate-100">
           <button type="button" id="deleteBtn" onclick="confirmDeleteJob()" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-semibold text-xs transition hidden">
-            🗑️ ลบงานนี้
+            🗑️ ลบงาน
           </button>
-          
           <div class="flex gap-2 ml-auto">
             <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 text-xs font-medium">ยกเลิก</button>
             <button type="submit" id="saveBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xs font-semibold shadow-sm transition">บันทึกข้อมูล</button>
@@ -169,17 +208,15 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 4. JAVASCRIPT LOGIC                        -->
-  <!-- ========================================== -->
+  <!-- ================= JAVASCRIPT ================= -->
   <script>
-    // URL Web App จาก Google Apps Script (Code.gs)
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPk6LFD1uxljIuVzpjprq41GZbFekaGmGtcO99d9gMcl6jlIIOtoGYgWuMJF98vv4C/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
 
     let allJobs = [];
     let currentUser = null;
+    let compressedBase64 = '';
+    const TEAM_MEMBERS = ["ฉัตรชัย", "ศรานนท์", "จิรวัฒณ์", "ชัยวัตน์"];
 
-    // 1. ระบบ Login & Logout
     async function handleLogin(e) {
       e.preventDefault();
       const usernameInput = document.getElementById('loginUsername').value;
@@ -195,24 +232,20 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'login', username: usernameInput, password: passwordInput })
         });
-
         const result = await response.json();
 
         if (result.status === 'success') {
           currentUser = result.user;
           document.getElementById('currentUserDisplay').innerText = currentUser.name;
           document.getElementById('currentRoleDisplay').innerText = currentUser.role;
-
           document.getElementById('loginSection').classList.add('hidden');
           document.getElementById('appSection').classList.remove('hidden');
-
           fetchJobs();
         } else {
           alert('เข้าสู่ระบบไม่สำเร็จ: ' + result.message);
         }
       } catch (err) {
         alert('เกิดข้อผิดพลาดในการเชื่อมต่อระบบ');
-        console.error(err);
       } finally {
         loginBtn.disabled = false;
         loginBtn.innerText = 'เข้าสู่ระบบ';
@@ -226,30 +259,87 @@
       document.getElementById('loginSection').classList.remove('hidden');
     }
 
-    // 2. ดึงข้อมูลรายการงาน และ จัดเรียง Unassigned ขึ้นก่อน
     async function fetchJobs() {
       try {
         const response = await fetch(WEB_APP_URL);
         const result = await response.json();
-
         if (result.status === 'success') {
           allJobs = result.data || [];
-          renderJobs();
+          updateSummaryCards();
+          updateAssigneeStats();
+          handleSearchAndFilter();
         }
       } catch (err) {
         console.error('Error fetching jobs:', err);
       }
     }
 
-    function renderJobs() {
+    function updateSummaryCards() {
+      document.getElementById('countAll').innerText = allJobs.length;
+      document.getElementById('countPending').innerText = allJobs.filter(j => j.Status === 'Pending').length;
+      document.getElementById('countInProgress').innerText = allJobs.filter(j => j.Status === 'In Progress').length;
+      document.getElementById('countCompleted').innerText = allJobs.filter(j => j.Status === 'Completed').length;
+    }
+
+    // 📊 แผงสรุปภาระงานรายบุคคล
+    function updateAssigneeStats() {
+      const container = document.getElementById('assigneeStatsContainer');
+      container.innerHTML = '';
+
+      TEAM_MEMBERS.forEach(member => {
+        // นับงานทั้งหมดที่คนนี้รับผิดชอบ
+        const memberJobs = allJobs.filter(j => (j.Assignee || '').includes(member));
+        const total = memberJobs.length;
+        // นับงานค้าง (Pending หรือ In Progress)
+        const pending = memberJobs.filter(j => j.Status === 'Pending' || j.Status === 'In Progress').length;
+
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-lg border text-xs sm:text-sm ${pending > 0 ? 'bg-indigo-50/40 border-indigo-200' : 'bg-slate-50 border-slate-200'}`;
+        card.innerHTML = `
+          <p class="font-bold text-slate-800 truncate">${member}</p>
+          <div class="mt-1 flex justify-between text-slate-600 text-[11px] sm:text-xs">
+            <span>ทั้งหมด: <strong class="text-indigo-600">${total}</strong></span>
+            <span>ค้าง: <strong class="text-amber-600">${pending}</strong></span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterByStatus(status) {
+      document.getElementById('statusFilter').value = status;
+      handleSearchAndFilter();
+    }
+
+    function handleSearchAndFilter() {
+      const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+      const statusValue = document.getElementById('statusFilter').value;
+
+      const filteredJobs = allJobs.filter(job => {
+        const matchSearch = (job.Job_ID || '').toLowerCase().includes(searchText) ||
+                            (job.Title || '').toLowerCase().includes(searchText) ||
+                            (job.Assignee || '').toLowerCase().includes(searchText) ||
+                            (job.Requester || '').toLowerCase().includes(searchText);
+        const matchStatus = (statusValue === 'ALL') || (job.Status === statusValue);
+        return matchSearch && matchStatus;
+      });
+
+      renderJobs(filteredJobs);
+    }
+
+    function renderJobs(jobsToRender) {
       const jobListContainer = document.getElementById('jobList');
       jobListContainer.innerHTML = '';
 
-      // 📌 จัดเรียง: ให้ Unassigned (ไม่ระบุคน) ขึ้นมาอยู่ด้านบนสุด
-      const sortedJobs = [...allJobs].sort((a, b) => {
+      if (jobsToRender.length === 0) {
+        jobListContainer.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-sm">ไม่พบรายการงานที่ตรงกับเงื่อนไข</div>`;
+        return;
+      }
+
+      // จัดเรียง Unassigned ขึ้นก่อน
+      const sortedJobs = [...jobsToRender].sort((a, b) => {
         const assigneeA = (a.Assignee || '').trim();
         const assigneeB = (b.Assignee || '').trim();
-
         const isUnassignedA = !assigneeA || assigneeA === 'ไม่ระบุ' || assigneeA === '-';
         const isUnassignedB = !assigneeB || assigneeB === 'ไม่ระบุ' || assigneeB === '-';
 
@@ -258,44 +348,44 @@
         return (b.Job_ID || '').localeCompare(a.Job_ID || '');
       });
 
-      // เรนเดอร์การ์ดงาน
       sortedJobs.forEach(job => {
         const isUnassigned = !job.Assignee || job.Assignee === 'ไม่ระบุ' || job.Assignee === '-';
         const hasImage = job.Image_URL && job.Image_URL.trim() !== '';
 
+        // จัดรูปแบบ DueDate ไม่ให้แสดงแปลกๆ
+        let displayDueDate = job.DueDate || '';
+        if (displayDueDate.includes('T')) {
+          displayDueDate = displayDueDate.split('T')[0];
+        }
+
         const card = document.createElement('div');
-        card.className = `bg-white rounded-xl shadow-sm border ${isUnassigned ? 'border-red-300 bg-red-50/20' : 'border-slate-200'} p-5 hover:shadow-md transition flex flex-col justify-between`;
+        card.className = `bg-white rounded-xl shadow-sm border ${isUnassigned ? 'border-red-300 bg-red-50/20' : 'border-slate-200'} p-4 sm:p-5 flex flex-col justify-between`;
 
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-3">
-              <span class="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">${job.Job_ID}</span>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${getStatusBadgeClass(job.Status)}">${job.Status}</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded border border-slate-200">${job.Job_ID}</span>
+              <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${getStatusBadgeClass(job.Status)}">${job.Status}</span>
             </div>
 
-            <h3 class="font-bold text-slate-800 text-base mb-2 line-clamp-2">${job.Title}</h3>
+            <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-2 line-clamp-2">${job.Title}</h3>
             
             <div class="text-xs text-slate-600 space-y-1 mb-4">
               <p>👤 ผู้รับผิดชอบ: <span class="${isUnassigned ? 'text-red-500 font-bold' : 'font-medium text-slate-800'}">${isUnassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
               ${job.Requester ? `<p class="text-slate-500">🙋‍♂️ ผู้แจ้ง: ${job.Requester}</p>` : ''}
-              ${job.DueDate ? `<p class="text-slate-500">📅 กำหนดส่ง: ${job.DueDate}</p>` : ''}
+              ${displayDueDate ? `<p class="text-slate-500">📅 กำหนดส่ง: ${displayDueDate}</p>` : ''}
             </div>
           </div>
 
-          <!-- Bottom Footer ของ Card -->
           <div class="flex justify-between items-center pt-3 border-t border-slate-100 text-xs">
-            <!-- ซ่อนรูปภาพในการ์ด แสดงเฉพาะป้ายไอคอนบอกว่ามีรูปแนบหรือไม่ -->
             <div>
               ${hasImage ? '<span class="inline-flex items-center gap-1 text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 font-medium">🖼️ มีรูปแนบ</span>' : '<span class="text-slate-400">ไม่มีรูป</span>'}
             </div>
-
-            <!-- ปุ่มกดเปิด Modal ดู/แก้ไขรูปภาพเต็ม -->
             <button onclick="openEditModal('${job.Job_ID}')" class="text-indigo-600 hover:text-indigo-800 font-semibold underline">
               ✏️ ดู / แก้ไข
             </button>
           </div>
         `;
-
         jobListContainer.appendChild(card);
       });
     }
@@ -306,12 +396,16 @@
       return 'bg-slate-100 text-slate-700';
     }
 
-    // 3. Modal Handlers & Base64 Image Preview
     function openCreateModal() {
       document.getElementById('jobForm').reset();
+      compressedBase64 = '';
       document.getElementById('editJobId').value = '';
       document.getElementById('modalTitle').innerText = '➕ สร้างงานใหม่';
       document.getElementById('editRequester').value = currentUser ? currentUser.name : '';
+      
+      // เคลียร์ Checkbox ผู้รับผิดชอบทั้งหมด
+      document.querySelectorAll('input[name="assigneeCheckbox"]').forEach(cb => cb.checked = false);
+
       document.getElementById('imagePreviewContainer').classList.add('hidden');
       document.getElementById('deleteBtn').classList.add('hidden');
       document.getElementById('jobModal').classList.remove('hidden');
@@ -321,18 +415,27 @@
       const job = allJobs.find(j => j.Job_ID === jobId);
       if (!job) return;
 
+      compressedBase64 = '';
       document.getElementById('modalTitle').innerText = '✏️ แก้ไขรายการงาน';
       document.getElementById('editJobId').value = job.Job_ID;
       document.getElementById('editTitle').value = job.Title || '';
       document.getElementById('editRequester').value = job.Requester || '';
-      document.getElementById('editAssignee').value = job.Assignee || '';
       document.getElementById('editStatus').value = job.Status || 'Pending';
-      document.getElementById('editDueDate').value = job.DueDate || '';
+      
+      let cleanDueDate = job.DueDate || '';
+      if (cleanDueDate.includes('T')) cleanDueDate = cleanDueDate.split('T')[0];
+      document.getElementById('editDueDate').value = cleanDueDate;
+      
       document.getElementById('editDetails').value = job.Details || '';
+
+      // ติ๊ก Checkbox ตามรายชื่อผู้รับผิดชอบที่มีอยู่
+      const currentAssignees = (job.Assignee || '').split(',').map(s => s.trim());
+      document.querySelectorAll('input[name="assigneeCheckbox"]').forEach(cb => {
+        cb.checked = currentAssignees.includes(cb.value);
+      });
 
       const imgPreviewContainer = document.getElementById('imagePreviewContainer');
       const imgPreview = document.getElementById('editImagePreview');
-
       if (job.Image_URL && job.Image_URL.trim() !== '') {
         imgPreview.src = job.Image_URL;
         imgPreviewContainer.classList.remove('hidden');
@@ -348,43 +451,64 @@
     function closeModal() {
       document.getElementById('jobModal').classList.add('hidden');
       document.getElementById('jobForm').reset();
+      compressedBase64 = '';
     }
 
-    function previewSelectedImage(event) {
+    async function previewSelectedImage(event) {
       const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('editImagePreview').src = e.target.result;
-          document.getElementById('imagePreviewContainer').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
+      const compressStatus = document.getElementById('compressStatus');
+      compressStatus.classList.remove('hidden');
+
+      try {
+        compressedBase64 = await compressImage(file, 1024, 0.7);
+        document.getElementById('editImagePreview').src = compressedBase64;
+        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+      } catch (err) {
+        console.error(err);
+      } finally {
+        compressStatus.classList.add('hidden');
       }
     }
 
-    function convertFileToBase64(file) {
+    function compressImage(file, maxWidth = 1024, quality = 0.7) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
+        reader.onload = event => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            let width = img.width, height = img.height;
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = error => reject(error);
+        };
         reader.onerror = error => reject(error);
       });
     }
 
-    // 4. Save & Delete Job Logic
     async function saveJob(e) {
       e.preventDefault();
-      
       const saveBtn = document.getElementById('saveBtn');
       const jobId = document.getElementById('editJobId').value;
       const isCreate = !jobId;
-      const fileInput = document.getElementById('editImageFile');
-      const file = fileInput.files[0];
 
-      let imageBase64 = '';
-      if (file) {
-        imageBase64 = await convertFileToBase64(file);
-      }
+      // รวบรวมรายชื่อผู้รับผิดชอบจาก Checkbox ที่เลือก
+      const selectedAssignees = [];
+      document.querySelectorAll('input[name="assigneeCheckbox"]:checked').forEach(cb => {
+        selectedAssignees.push(cb.value);
+      });
+      const assigneeString = selectedAssignees.length > 0 ? selectedAssignees.join(', ') : 'ไม่ระบุ';
 
       const payload = {
         action: isCreate ? 'create' : 'update',
@@ -392,26 +516,23 @@
           jobId: jobId,
           title: document.getElementById('editTitle').value,
           requester: document.getElementById('editRequester').value,
-          assignee: document.getElementById('editAssignee').value,
+          assignee: assigneeString,
           status: document.getElementById('editStatus').value,
           dueDate: document.getElementById('editDueDate').value,
           details: document.getElementById('editDetails').value,
-          imageBase64: imageBase64
+          imageBase64: compressedBase64
         }
       };
 
       try {
         saveBtn.disabled = true;
         saveBtn.innerText = 'กำลังบันทึก...';
-
         const response = await fetch(WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-
         const result = await response.json();
-
         if (result.status === 'success') {
           closeModal();
           fetchJobs();
@@ -419,7 +540,6 @@
           alert('บันทึกไม่สำเร็จ: ' + result.message);
         }
       } catch (err) {
-        console.error('Error saving job:', err);
         alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
       } finally {
         saveBtn.disabled = false;
@@ -437,9 +557,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'delete', jobId: jobId })
         });
-
         const result = await response.json();
-
         if (result.status === 'success') {
           closeModal();
           fetchJobs();
@@ -447,7 +565,6 @@
           alert('ลบงานไม่สำเร็จ: ' + result.message);
         }
       } catch (err) {
-        console.error('Error deleting job:', err);
         alert('เกิดข้อผิดพลาดในการลบรายการ');
       }
     }
