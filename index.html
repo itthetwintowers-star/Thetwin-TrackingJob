@@ -1,43 +1,39 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tracking Job System</title>
-  
-  <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4f46e5">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TrackingJob">
-  
-  <!-- HTML5 + Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Prompt -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Prompt', sans-serif; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
+<body class="bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200">
 
   <!-- ================= LOGIN SECTION ================= -->
   <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200">
+    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200 dark:border-slate-700">
       <div class="text-center mb-6">
-        <h1 class="text-2xl font-bold text-slate-800">📌 Tracking Job</h1>
-        <p class="text-slate-500 text-sm mt-1">เข้าสู่ระบบเพื่อจัดการรายการงาน</p>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">📌 Tracking Job</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">เข้าสู่ระบบเพื่อจัดการรายการงาน</p>
       </div>
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
-          <input type="text" id="loginUsername" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required placeholder="ระบุ Username">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ชื่อผู้ใช้งาน (Username)</label>
+          <input type="text" id="loginUsername" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required placeholder="ระบุ Username">
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน (Password)</label>
-          <input type="password" id="loginPassword" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required placeholder="ระบุ Password">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">รหัสผ่าน (Password)</label>
+          <input type="password" id="loginPassword" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required placeholder="ระบุ Password">
         </div>
         <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow transition">
           เข้าสู่ระบบ
@@ -50,16 +46,28 @@
   <div id="appSection" class="hidden pb-12">
     
     <!-- Navbar -->
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <nav class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
-          <span class="text-lg sm:text-xl font-bold text-indigo-600 truncate">📌 Tracking Job</span>
-          <div class="flex items-center gap-2 sm:gap-4">
+          <span class="text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 truncate">📌 Tracking Job</span>
+          
+          <div class="flex items-center gap-2 sm:gap-3">
+            <!-- 🌙 Toggle Dark Mode -->
+            <button onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm">
+              <span id="themeIcon">🌙</span>
+            </button>
+
+            <!-- 📜 ปุ่มดู Audit Log (แสดงเฉพาะ Admin) -->
+            <button id="logBtn" onclick="openLogModal()" class="hidden text-slate-600 dark:text-slate-300 hover:text-indigo-600 font-medium text-xs sm:text-sm px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition">
+              📜 ประวัติ
+            </button>
+
             <div class="text-right hidden sm:block">
-              <p id="currentUserDisplay" class="text-sm font-semibold text-slate-800">-</p>
-              <p id="currentRoleDisplay" class="text-xs text-slate-500">-</p>
+              <p id="currentUserDisplay" class="text-sm font-semibold text-slate-800 dark:text-slate-200">-</p>
+              <p id="currentRoleDisplay" class="text-xs text-slate-500 dark:text-slate-400">-</p>
             </div>
-            <button onclick="handleLogout()" class="text-slate-500 hover:text-red-600 font-medium text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition">
+            
+            <button onclick="handleLogout()" class="text-slate-500 dark:text-slate-400 hover:text-red-600 font-medium text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition">
               ออกจากระบบ
             </button>
           </div>
@@ -71,28 +79,28 @@
       
       <!-- Summary Cards Status -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <div onclick="filterByStatus('ALL')" class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition">
-          <p class="text-[11px] sm:text-xs font-semibold text-slate-500">งานทั้งหมด</p>
-          <p id="countAll" class="text-xl sm:text-2xl font-bold mt-1 text-slate-800">0</p>
+        <div onclick="filterByStatus('ALL')" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-indigo-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400">งานทั้งหมด</p>
+          <p id="countAll" class="text-xl sm:text-2xl font-bold mt-1 text-slate-800 dark:text-white">0</p>
         </div>
-        <div onclick="filterByStatus('Pending')" class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-slate-400 transition">
-          <p class="text-[11px] sm:text-xs font-semibold text-slate-500">⏳ Pending</p>
-          <p id="countPending" class="text-xl sm:text-2xl font-bold mt-1 text-slate-700">0</p>
+        <div onclick="filterByStatus('Pending')" class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-slate-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400">⏳ Pending</p>
+          <p id="countPending" class="text-xl sm:text-2xl font-bold mt-1 text-slate-700 dark:text-slate-300">0</p>
         </div>
-        <div onclick="filterByStatus('In Progress')" class="bg-amber-50/50 p-3 sm:p-4 rounded-xl border border-amber-200 shadow-sm cursor-pointer hover:border-amber-400 transition">
-          <p class="text-[11px] sm:text-xs font-semibold text-amber-600">🔄 In Progress</p>
-          <p id="countInProgress" class="text-xl sm:text-2xl font-bold mt-1 text-amber-700">0</p>
+        <div onclick="filterByStatus('In Progress')" class="bg-amber-50/50 dark:bg-amber-900/20 p-3 sm:p-4 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm cursor-pointer hover:border-amber-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-amber-600 dark:text-amber-400">🔄 In Progress</p>
+          <p id="countInProgress" class="text-xl sm:text-2xl font-bold mt-1 text-amber-700 dark:text-amber-300">0</p>
         </div>
-        <div onclick="filterByStatus('Completed')" class="bg-emerald-50/50 p-3 sm:p-4 rounded-xl border border-emerald-200 shadow-sm cursor-pointer hover:border-emerald-400 transition">
-          <p class="text-[11px] sm:text-xs font-semibold text-emerald-600">✅ Completed</p>
-          <p id="countCompleted" class="text-xl sm:text-2xl font-bold mt-1 text-emerald-700">0</p>
+        <div onclick="filterByStatus('Completed')" class="bg-emerald-50/50 dark:bg-emerald-900/20 p-3 sm:p-4 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm cursor-pointer hover:border-emerald-400 transition">
+          <p class="text-[11px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400">✅ Completed</p>
+          <p id="countCompleted" class="text-xl sm:text-2xl font-bold mt-1 text-emerald-700 dark:text-emerald-300">0</p>
         </div>
       </div>
 
-      <!-- สรุปภาระงานรายบุคคล -->
-      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm mb-6">
-        <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-1.5">
-          <span>👥</span> สรุปภาระงานรายบุคคล (ยอดงานทั้งหมด / ค้างอยู่)
+      <!-- 👥 สรุปภาระงานรายบุคคล -->
+      <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm mb-6">
+        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-1.5">
+          <span>👥</span> สรุปภาระงานรายบุคคล (ทั้งหมด / ค้างอยู่)
         </h3>
         <div id="assigneeStatsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4"></div>
       </div>
@@ -100,23 +108,31 @@
       <!-- Action Bar Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h2 class="text-lg sm:text-xl font-bold text-slate-800">รายการงานทั้งหมด</h2>
-          <p class="text-[11px] sm:text-xs text-slate-500">*งานที่ยังไม่ระบุคนจะอยู่ด้านบนสุด</p>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">รายการงานทั้งหมด</h2>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">*งานที่ยังไม่ระบุคนจะอยู่ด้านบนสุด</p>
         </div>
-        <button onclick="openCreateModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition text-sm">
-          <span>➕</span> สร้างงานใหม่
-        </button>
+
+        <div class="flex gap-2">
+          <!-- 📊 ปุ่ม Export CSV -->
+          <button onclick="exportToCSV()" class="w-1/2 sm:w-auto inline-flex items-center justify-center gap-1 bg-slate-700 hover:bg-slate-800 text-white font-medium px-3.5 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
+            <span>📥</span> Export CSV
+          </button>
+          
+          <button onclick="openCreateModal()" class="w-1/2 sm:w-auto inline-flex items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
+            <span>➕</span> สร้างงานใหม่
+          </button>
+        </div>
       </div>
 
       <!-- Search & Filter Bar -->
-      <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-3">
+      <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">🔍</span>
-          <input type="text" id="searchInput" oninput="handleSearchAndFilter()" placeholder="ค้นหา Job ID, หัวข้อ, หรือผู้รับผิดชอบ..." class="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+          <input type="text" id="searchInput" oninput="handleSearchAndFilter()" placeholder="ค้นหา Job ID, หัวข้อ, หรือผู้รับผิดชอบ..." class="w-full pl-9 pr-4 py-2.5 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-xs font-medium text-slate-500 whitespace-nowrap">สถานะ:</span>
-          <select id="statusFilter" onchange="handleSearchAndFilter()" class="w-full sm:w-auto border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50">
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">สถานะ:</span>
+          <select id="statusFilter" onchange="handleSearchAndFilter()" class="w-full sm:w-auto border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
             <option value="ALL">ทั้งหมด</option>
             <option value="Pending">Pending</option>
             <option value="In Progress">In Progress</option>
@@ -133,67 +149,65 @@
 
   <!-- ================= MODAL EDIT / CREATE ================= -->
   <div id="jobModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 relative max-h-[95vh] overflow-y-auto">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 relative max-h-[95vh] overflow-y-auto">
       
       <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
       
-      <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-4 pb-2 border-b">✏️ แก้ไขรายการงาน</h3>
+      <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-800 dark:text-white mb-4 pb-2 border-b dark:border-slate-700">✏️ แก้ไขรายการงาน</h3>
 
       <form id="jobForm" onsubmit="saveJob(event)" class="space-y-4">
         <input type="hidden" id="editJobId">
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">หัวข้องาน</label>
-          <input type="text" id="editTitle" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">หัวข้องาน</label>
+          <input type="text" id="editTitle" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้แจ้งงาน (Requester)</label>
-            <input type="text" id="editRequester" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ผู้แจ้งงาน (Requester)</label>
+            <input type="text" id="editRequester" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">กำหนดส่ง (Due Date)</label>
-            <input type="date" id="editDueDate" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">กำหนดส่ง (Due Date)</label>
+            <input type="date" id="editDueDate" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-2">👤 ผู้รับผิดชอบ (เลือกได้มากกว่า 1 คน)</label>
-          <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">👤 ผู้รับผิดชอบ (เลือกได้มากกว่า 1 คน)</label>
+          <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl">
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
               <input type="checkbox" name="assigneeCheckbox" value="ฉัตรชัย" class="w-4 h-4 text-indigo-600 rounded"> ฉัตรชัย
             </label>
-            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
               <input type="checkbox" name="assigneeCheckbox" value="ศรานนท์" class="w-4 h-4 text-indigo-600 rounded"> ศรานนท์
             </label>
-            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
               <input type="checkbox" name="assigneeCheckbox" value="จิรวัฒณ์" class="w-4 h-4 text-indigo-600 rounded"> จิรวัฒณ์
             </label>
-            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
               <input type="checkbox" name="assigneeCheckbox" value="ชัยวัตน์" class="w-4 h-4 text-indigo-600 rounded"> ชัยวัตน์
             </label>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">สถานะ</label>
-            <select id="editStatus" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">สถานะ</label>
+          <select id="editStatus" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียดงาน</label>
-          <textarea id="editDetails" rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">รายละเอียดงาน</label>
+          <textarea id="editDetails" rows="3" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
         </div>
 
-        <div class="border-t border-slate-100 pt-3">
-          <label class="block text-xs font-semibold text-slate-700 mb-2">🖼️ รูปภาพประกอบ (ย่อขนาดอัตโนมัติ)</label>
+        <div class="border-t border-slate-100 dark:border-slate-700 pt-3">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">🖼️ รูปภาพประกอบ</label>
           <div id="imagePreviewContainer" class="hidden mb-3">
             <img id="editImagePreview" src="" alt="รูปประกอบ" class="w-full h-40 sm:h-48 object-cover rounded-xl border border-slate-200 shadow-sm">
           </div>
@@ -201,23 +215,44 @@
           <p id="compressStatus" class="text-[10px] text-indigo-600 font-medium mt-1 hidden">⚡ กำลังย่อขนาดรูปภาพ...</p>
         </div>
 
-        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+        <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-700">
           <button type="button" id="deleteBtn" onclick="confirmDeleteJob()" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-semibold text-xs transition hidden">
             🗑️ ลบงาน
           </button>
           <div class="flex gap-2 ml-auto">
-            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 text-xs font-medium">ยกเลิก</button>
+            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-medium">ยกเลิก</button>
             <button type="submit" id="saveBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xs font-semibold shadow-sm transition">บันทึกข้อมูล</button>
           </div>
         </div>
       </form>
-
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT & PWA REGISTRATION ================= -->
+  <!-- ================= AUDIT LOG MODAL ================= -->
+  <div id="logModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full p-5 relative max-h-[85vh] overflow-y-auto">
+      <button onclick="closeLogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
+      <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4 pb-2 border-b dark:border-slate-700">📜 ประวัติการทำงาน (Audit Logs)</h3>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+          <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase font-semibold">
+            <tr>
+              <th class="p-2.5">วัน-เวลา</th>
+              <th class="p-2.5">ผู้ทำรายการ</th>
+              <th class="p-2.5">Action</th>
+              <th class="p-2.5">Job ID</th>
+              <th class="p-2.5">รายละเอียด</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT ================= -->
   <script>
-    // ⚠️ ระบุ URL Web App ที่ได้จาก Google Apps Script (Code.gs)
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPk6LFD1uxljIuVzpjprq41GZbFekaGmGtcO99d9gMcl6jlIIOtoGYgWuMJF98vv4C/exec';
 
     let allJobs = [];
@@ -225,13 +260,23 @@
     let compressedBase64 = '';
     const TEAM_MEMBERS = ["ฉัตรชัย", "ศรานนท์", "จิรวัฒณ์", "ชัยวัตน์"];
 
-    // Register Service Worker for PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(reg => console.log('PWA Service Worker Registered!'))
-          .catch(err => console.error('PWA Registration Failed:', err));
-      });
+    // 🌙 Dark Mode Toggle
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        document.getElementById('themeIcon').innerText = '🌙';
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        document.getElementById('themeIcon').innerText = '☀️';
+      }
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.getElementById('themeIcon').innerText = '☀️';
     }
 
     async function handleLogin(e) {
@@ -254,7 +299,15 @@
         if (result.status === 'success') {
           currentUser = result.user;
           document.getElementById('currentUserDisplay').innerText = currentUser.name;
-          document.getElementById('currentRoleDisplay').innerText = currentUser.role;
+          document.getElementById('currentRoleDisplay').innerText = `Role: ${currentUser.role}`;
+
+          // แสดงปุ่มดู Audit Log หากเป็น Admin
+          if (currentUser.role === 'Admin') {
+            document.getElementById('logBtn').classList.remove('hidden');
+          } else {
+            document.getElementById('logBtn').classList.add('hidden');
+          }
+
           document.getElementById('loginSection').classList.add('hidden');
           document.getElementById('appSection').classList.remove('hidden');
           fetchJobs();
@@ -308,12 +361,12 @@
         const pending = memberJobs.filter(j => j.Status === 'Pending' || j.Status === 'In Progress').length;
 
         const card = document.createElement('div');
-        card.className = `p-3 rounded-lg border text-xs sm:text-sm ${pending > 0 ? 'bg-indigo-50/40 border-indigo-200' : 'bg-slate-50 border-slate-200'}`;
+        card.className = `p-3 rounded-lg border text-xs sm:text-sm ${pending > 0 ? 'bg-indigo-50/40 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800' : 'bg-slate-50 dark:bg-slate-700/40 border-slate-200 dark:border-slate-700'}`;
         card.innerHTML = `
-          <p class="font-bold text-slate-800 truncate">${member}</p>
-          <div class="mt-1 flex justify-between text-slate-600 text-[11px] sm:text-xs">
-            <span>ทั้งหมด: <strong class="text-indigo-600">${total}</strong></span>
-            <span>ค้าง: <strong class="text-amber-600">${pending}</strong></span>
+          <p class="font-bold text-slate-800 dark:text-slate-200 truncate">${member}</p>
+          <div class="mt-1 flex justify-between text-slate-600 dark:text-slate-400 text-[11px] sm:text-xs">
+            <span>ทั้งหมด: <strong class="text-indigo-600 dark:text-indigo-400">${total}</strong></span>
+            <span>ค้าง: <strong class="text-amber-600 dark:text-amber-400">${pending}</strong></span>
           </div>
         `;
         container.appendChild(card);
@@ -350,6 +403,9 @@
         return;
       }
 
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const sortedJobs = [...jobsToRender].sort((a, b) => {
         const assigneeA = (a.Assignee || '').trim();
         const assigneeB = (b.Assignee || '').trim();
@@ -366,34 +422,43 @@
         const hasImage = job.Image_URL && job.Image_URL.trim() !== '';
 
         let displayDueDate = job.DueDate || '';
-        if (displayDueDate.includes('T')) {
-          displayDueDate = displayDueDate.split('T')[0];
+        if (displayDueDate.includes('T')) displayDueDate = displayDueDate.split('T')[0];
+
+        // 🚨 Check งานเกินกำหนดส่ง (Due Date Alert)
+        let isOverdue = false;
+        if (displayDueDate && job.Status !== 'Completed') {
+          const dDate = new Date(displayDueDate);
+          dDate.setHours(0, 0, 0, 0);
+          if (dDate < today) isOverdue = true;
         }
 
         const card = document.createElement('div');
-        card.className = `bg-white rounded-xl shadow-sm border ${isUnassigned ? 'border-red-300 bg-red-50/20' : 'border-slate-200'} p-4 sm:p-5 flex flex-col justify-between`;
+        card.className = `bg-white dark:bg-slate-800 rounded-xl shadow-sm border ${isOverdue ? 'border-red-500 bg-red-50/30 dark:bg-red-950/20' : (isUnassigned ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700')} p-4 sm:p-5 flex flex-col justify-between`;
 
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-3">
-              <span class="text-[11px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded border border-slate-200">${job.Job_ID}</span>
-              <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${getStatusBadgeClass(job.Status)}">${job.Status}</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-600">${job.Job_ID}</span>
+              <div class="flex gap-1">
+                ${isOverdue ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">⚠️ เลยกำหนด</span>' : ''}
+                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${getStatusBadgeClass(job.Status)}">${job.Status}</span>
+              </div>
             </div>
 
-            <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-2 line-clamp-2">${job.Title}</h3>
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm sm:text-base mb-2 line-clamp-2">${job.Title}</h3>
             
-            <div class="text-xs text-slate-600 space-y-1 mb-4">
-              <p>👤 ผู้รับผิดชอบ: <span class="${isUnassigned ? 'text-red-500 font-bold' : 'font-medium text-slate-800'}">${isUnassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
-              ${job.Requester ? `<p class="text-slate-500">🙋‍♂️ ผู้แจ้ง: ${job.Requester}</p>` : ''}
-              ${displayDueDate ? `<p class="text-slate-500">📅 กำหนดส่ง: ${displayDueDate}</p>` : ''}
+            <div class="text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-4">
+              <p>👤 ผู้รับผิดชอบ: <span class="${isUnassigned ? 'text-red-500 font-bold' : 'font-medium text-slate-800 dark:text-slate-200'}">${isUnassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
+              ${job.Requester ? `<p class="text-slate-500 dark:text-slate-400">🙋‍♂️ ผู้แจ้ง: ${job.Requester}</p>` : ''}
+              ${displayDueDate ? `<p class="${isOverdue ? 'text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400'}">📅 กำหนดส่ง: ${displayDueDate}</p>` : ''}
             </div>
           </div>
 
-          <div class="flex justify-between items-center pt-3 border-t border-slate-100 text-xs">
+          <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-700 text-xs">
             <div>
-              ${hasImage ? '<span class="inline-flex items-center gap-1 text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 font-medium">🖼️ มีรูปแนบ</span>' : '<span class="text-slate-400">ไม่มีรูป</span>'}
+              ${hasImage ? '<span class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800 font-medium">🖼️ มีรูปแนบ</span>' : '<span class="text-slate-400">ไม่มีรูป</span>'}
             </div>
-            <button onclick="openEditModal('${job.Job_ID}')" class="text-indigo-600 hover:text-indigo-800 font-semibold underline">
+            <button onclick="openEditModal('${job.Job_ID}')" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-semibold underline">
               ✏️ ดู / แก้ไข
             </button>
           </div>
@@ -403,9 +468,73 @@
     }
 
     function getStatusBadgeClass(status) {
-      if (status === 'Completed') return 'bg-emerald-100 text-emerald-800';
-      if (status === 'In Progress') return 'bg-amber-100 text-amber-800';
-      return 'bg-slate-100 text-slate-700';
+      if (status === 'Completed') return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+      if (status === 'In Progress') return 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+      return 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+    }
+
+    // 📊 ฟังก์ชัน Export ข้อมูลเป็นไฟล์ CSV
+    function exportToCSV() {
+      if (allJobs.length === 0) {
+        alert('ไม่มีข้อมูลสำหรับ Export');
+        return;
+      }
+
+      const headers = ['Job_ID', 'Title', 'Requester', 'Assignee', 'Status', 'DueDate', 'Details'];
+      let csvContent = "\uFEFF"; // UTF-8 BOM สำหรับภาษาไทยใน Excel
+      csvContent += headers.join(",") + "\n";
+
+      allJobs.forEach(j => {
+        let row = [
+          `"${j.Job_ID || ''}"`,
+          `"${(j.Title || '').replace(/"/g, '""')}"`,
+          `"${j.Requester || ''}"`,
+          `"${j.Assignee || ''}"`,
+          `"${j.Status || ''}"`,
+          `"${j.DueDate || ''}"`,
+          `"${(j.Details || '').replace(/"/g, '""')}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Tracking_Jobs_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 📜 Audit Log Modal Logic
+    async function openLogModal() {
+      try {
+        const response = await fetch(`${WEB_APP_URL}?action=getLogs`);
+        const result = await response.json();
+        if (result.status === 'success') {
+          const tbody = document.getElementById('logTableBody');
+          tbody.innerHTML = '';
+          result.data.forEach(l => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="p-2.5 whitespace-nowrap">${l.timestamp}</td>
+              <td class="p-2.5 font-bold">${l.username}</td>
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700">${l.action}</span></td>
+              <td class="p-2.5">${l.jobId}</td>
+              <td class="p-2.5">${l.details}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+          document.getElementById('logModal').classList.remove('hidden');
+        }
+      } catch (err) {
+        alert('ไม่สามารถดึงข้อมูล Audit Log ได้');
+      }
+    }
+
+    function closeLogModal() {
+      document.getElementById('logModal').classList.add('hidden');
     }
 
     function openCreateModal() {
@@ -452,7 +581,13 @@
         imgPreviewContainer.classList.add('hidden');
       }
 
-      document.getElementById('deleteBtn').classList.remove('hidden');
+      // 🔒 สิทธิ์การใช้งาน: เฉพาะ Admin เท่านั้นที่เห็นปุ่มลบงาน
+      if (currentUser && currentUser.role === 'Admin') {
+        document.getElementById('deleteBtn').classList.remove('hidden');
+      } else {
+        document.getElementById('deleteBtn').classList.add('hidden');
+      }
+
       document.getElementById('jobModal').classList.remove('hidden');
     }
 
@@ -519,6 +654,7 @@
 
       const payload = {
         action: isCreate ? 'create' : 'update',
+        currentUser: currentUser ? currentUser.username : 'Unknown',
         data: {
           jobId: jobId,
           title: document.getElementById('editTitle').value,
@@ -562,7 +698,7 @@
         const response = await fetch(WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'delete', jobId: jobId })
+          body: JSON.stringify({ action: 'delete', jobId: jobId, currentUser: currentUser ? currentUser.username : 'Unknown' })
         });
         const result = await response.json();
         if (result.status === 'success') {
