@@ -95,7 +95,7 @@
         </div>
       </div>
 
-      <!-- สรุปภาระงานรายบุคคล (คลิกเพื่อกรองงานตามรายชื่อได้) -->
+      <!-- สรุปภาระงานรายบุคคล -->
       <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm mb-6">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -110,15 +110,21 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">รายการงานทั้งหมด</h2>
-          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">*งานที่ยังไม่เสร็จและยังไม่ระบุคนจะอยู่ด้านบนสุด</p>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+            *งานที่ยังไม่เสร็จและยังไม่ระบุคนจะอยู่ด้านบนสุด · อัปเดตล่าสุด: <span id="lastUpdatedText" class="font-medium text-slate-700 dark:text-slate-300">-</span>
+          </p>
         </div>
 
-        <div class="flex gap-2">
-          <button onclick="exportToCSV()" class="w-1/2 sm:w-auto inline-flex items-center justify-center gap-1 bg-slate-700 hover:bg-slate-800 text-white font-medium px-3.5 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="refreshJobs()" id="refreshBtn" class="inline-flex items-center justify-center gap-1 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-medium px-3 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
+            <span id="refreshIcon">🔄</span> รีเฟรช
+          </button>
+
+          <button type="button" onclick="exportToCSV()" class="inline-flex items-center justify-center gap-1 bg-slate-700 hover:bg-slate-800 text-white font-medium px-3.5 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
             <span>📥</span> Export CSV
           </button>
           
-          <button onclick="openCreateModal()" class="w-1/2 sm:w-auto inline-flex items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
+          <button type="button" onclick="openCreateModal()" class="inline-flex items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
             <span>➕</span> สร้างงานใหม่
           </button>
         </div>
@@ -135,7 +141,8 @@
           <span class="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">สถานะ:</span>
           <select id="statusFilter" onchange="handleSearchAndFilter()" class="w-full sm:w-auto border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
             <option value="ALL">ทั้งหมด</option>
-            <option value="OVERDUE">⚠️ เลยกำหนดส่ง (ยังไม่เสร็จ)</option>
+            <option value="UNASSIGNED">⚠️ ยังไม่ระบุผู้รับผิดชอบ (ยังไม่เสร็จ)</option>
+            <option value="OVERDUE">🚨 เลยกำหนดส่ง (ยังไม่เสร็จ)</option>
             <option value="Pending">Pending</option>
             <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
@@ -164,11 +171,11 @@
   <div id="jobModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 relative max-h-[95vh] overflow-y-auto">
       
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
+      <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
       
       <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-800 dark:text-white mb-4 pb-2 border-b dark:border-slate-700">✏️ แก้ไขรายการงาน</h3>
 
-      <form id="jobForm" onsubmit="saveJob(event)" class="space-y-4">
+      <form id="jobForm" oninput="markModalDirty()" onsubmit="saveJob(event)" class="space-y-4">
         <input type="hidden" id="editJobId">
 
         <div>
@@ -189,20 +196,7 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">👤 ผู้รับผิดชอบ (เลือกได้มากกว่า 1 คน)</label>
-          <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl">
-            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
-              <input type="checkbox" name="assigneeCheckbox" value="ฉัตรชัย" class="w-4 h-4 text-indigo-600 rounded"> ฉัตรชัย
-            </label>
-            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
-              <input type="checkbox" name="assigneeCheckbox" value="ศรานนท์" class="w-4 h-4 text-indigo-600 rounded"> ศรานนท์
-            </label>
-            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
-              <input type="checkbox" name="assigneeCheckbox" value="จิรวัฒณ์" class="w-4 h-4 text-indigo-600 rounded"> จิรวัฒณ์
-            </label>
-            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
-              <input type="checkbox" name="assigneeCheckbox" value="ชัยวัตน์" class="w-4 h-4 text-indigo-600 rounded"> ชัยวัตน์
-            </label>
-          </div>
+          <div id="assigneeCheckboxGroup" class="grid grid-cols-2 gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl"></div>
         </div>
 
         <div>
@@ -244,7 +238,7 @@
   <!-- ================= AUDIT LOG MODAL ================= -->
   <div id="logModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full p-5 relative max-h-[85vh] overflow-y-auto">
-      <button onclick="closeLogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
+      <button type="button" onclick="closeLogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
       <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4 pb-2 border-b dark:border-slate-700">📜 ประวัติการทำงาน (Audit Logs)</h3>
       
       <div class="overflow-x-auto">
@@ -267,12 +261,23 @@
   <!-- ================= JAVASCRIPT ================= -->
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPk6LFD1uxljIuVzpjprq41GZbFekaGmGtcO99d9gMcl6jlIIOtoGYgWuMJF98vv4C/exec';
+    const TEAM_MEMBERS = ["ฉัตรชัย", "ศรานนท์", "จิรวัฒณ์", "ชัยวัตน์"];
 
     let allJobs = [];
     let currentUser = null;
     let compressedBase64 = '';
     let selectedMemberFilter = '';
-    const TEAM_MEMBERS = ["ฉัตรชัย", "ศรานนท์", "จิรวัฒณ์", "ชัยวัตน์"];
+    let isModalDirty = false;
+
+    function renderAssigneeCheckboxes() {
+      const group = document.getElementById('assigneeCheckboxGroup');
+      group.innerHTML = TEAM_MEMBERS.map(member => `
+        <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
+          <input type="checkbox" name="assigneeCheckbox" value="${member}" onchange="markModalDirty()" class="w-4 h-4 text-indigo-600 rounded"> ${member}
+        </label>
+      `).join('');
+    }
+    renderAssigneeCheckboxes();
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -348,12 +353,24 @@
       document.getElementById('loginSection').classList.remove('hidden');
     }
 
+    async function refreshJobs() {
+      const icon = document.getElementById('refreshIcon');
+      const btn = document.getElementById('refreshBtn');
+      icon.classList.add('inline-block', 'animate-spin');
+      btn.disabled = true;
+      await fetchJobs();
+      icon.classList.remove('animate-spin');
+      btn.disabled = false;
+    }
+
     async function fetchJobs() {
       try {
         const response = await fetch(WEB_APP_URL);
         const result = await response.json();
         if (result.status === 'success') {
           allJobs = result.data || [];
+          const now = new Date();
+          document.getElementById('lastUpdatedText').innerText = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
           updateSummaryCards();
           updateAssigneeStats();
           handleSearchAndFilter();
@@ -415,6 +432,11 @@
       handleSearchAndFilter();
     }
 
+    function isJobUnassigned(job) {
+      const assignee = (job.Assignee || '').trim();
+      return !assignee || assignee === 'ไม่ระบุ' || assignee === '-';
+    }
+
     function isJobOverdue(job, today) {
       let displayDueDate = job.DueDate || '';
       if (displayDueDate.includes('T')) displayDueDate = displayDueDate.split('T')[0];
@@ -450,6 +472,8 @@
         let matchStatus = true;
         if (statusValue === 'OVERDUE') {
           matchStatus = isJobOverdue(job, today);
+        } else if (statusValue === 'UNASSIGNED') {
+          matchStatus = isJobUnassigned(job) && job.Status !== 'Completed';
         } else if (statusValue !== 'ALL') {
           matchStatus = (job.Status === statusValue);
         }
@@ -488,12 +512,9 @@
         return;
       }
 
-      // ดันเฉพาะงานที่ยังไม่เสร็จ (Status !== 'Completed') และยังไม่ระบุผู้รับผิดชอบขึ้นด้านบนสุด
       const sortedJobs = [...jobsToRender].sort((a, b) => {
-        const assigneeA = (a.Assignee || '').trim();
-        const assigneeB = (b.Assignee || '').trim();
-        const isUnassignedA = (!assigneeA || assigneeA === 'ไม่ระบุ' || assigneeA === '-') && a.Status !== 'Completed';
-        const isUnassignedB = (!assigneeB || assigneeB === 'ไม่ระบุ' || assigneeB === '-') && b.Status !== 'Completed';
+        const isUnassignedA = isJobUnassigned(a) && a.Status !== 'Completed';
+        const isUnassignedB = isJobUnassigned(b) && b.Status !== 'Completed';
 
         if (isUnassignedA && !isUnassignedB) return -1;
         if (!isUnassignedA && isUnassignedB) return 1;
@@ -501,8 +522,7 @@
       });
 
       sortedJobs.forEach(job => {
-        const rawAssignee = (job.Assignee || '').trim();
-        const isUnassigned = !rawAssignee || rawAssignee === 'ไม่ระบุ' || rawAssignee === '-';
+        const unassigned = isJobUnassigned(job);
         const hasImage = job.Image_URL && job.Image_URL.trim() !== '';
 
         let displayDueDate = job.DueDate || '';
@@ -511,7 +531,7 @@
         const overdue = isJobOverdue(job, today);
 
         const card = document.createElement('div');
-        card.className = `bg-white dark:bg-slate-800 rounded-xl shadow-sm border ${overdue ? 'border-red-500 bg-red-50/30 dark:bg-red-950/20' : (isUnassigned && job.Status !== 'Completed' ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700')} p-4 sm:p-5 flex flex-col justify-between`;
+        card.className = `bg-white dark:bg-slate-800 rounded-xl shadow-sm border ${overdue ? 'border-red-500 bg-red-50/30 dark:bg-red-950/20' : (unassigned && job.Status !== 'Completed' ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700')} p-4 sm:p-5 flex flex-col justify-between`;
 
         card.innerHTML = `
           <div>
@@ -526,7 +546,7 @@
             <h3 class="font-bold text-slate-800 dark:text-white text-sm sm:text-base mb-2 line-clamp-2">${job.Title}</h3>
             
             <div class="text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-4">
-              <p>👤 ผู้รับผิดชอบ: <span class="${isUnassigned ? 'text-red-500 font-bold' : 'font-medium text-slate-800 dark:text-slate-200'}">${isUnassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
+              <p>👤 ผู้รับผิดชอบ: <span class="${unassigned ? 'text-red-500 font-bold' : 'font-medium text-slate-800 dark:text-slate-200'}">${unassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
               ${job.Requester ? `<p class="text-slate-500 dark:text-slate-400">🙋‍♂️ ผู้แจ้ง: ${job.Requester}</p>` : ''}
               ${displayDueDate ? `<p class="${overdue ? 'text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400'}">📅 กำหนดส่ง: ${displayDueDate}</p>` : ''}
             </div>
@@ -536,7 +556,7 @@
             <div>
               ${hasImage ? '<span class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800 font-medium">🖼️ มีรูปแนบ</span>' : '<span class="text-slate-400">ไม่มีรูป</span>'}
             </div>
-            <button onclick="openEditModal('${job.Job_ID}')" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-semibold underline">
+            <button type="button" onclick="openEditModal('${job.Job_ID}')" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-semibold underline">
               ✏️ ดู / แก้ไข
             </button>
           </div>
@@ -613,9 +633,14 @@
       document.getElementById('logModal').classList.add('hidden');
     }
 
+    function markModalDirty() {
+      isModalDirty = true;
+    }
+
     function openCreateModal() {
       document.getElementById('jobForm').reset();
       compressedBase64 = '';
+      isModalDirty = false;
       document.getElementById('editJobId').value = '';
       document.getElementById('modalTitle').innerText = '➕ สร้างงานใหม่';
       document.getElementById('editRequester').value = currentUser ? currentUser.name : '';
@@ -630,6 +655,7 @@
       if (!job) return;
 
       compressedBase64 = '';
+      isModalDirty = false;
       document.getElementById('modalTitle').innerText = '✏️ แก้ไขรายการงาน';
       document.getElementById('editJobId').value = job.Job_ID;
       document.getElementById('editTitle').value = job.Title || '';
@@ -667,9 +693,13 @@
     }
 
     function closeModal() {
+      if (isModalDirty && !confirm('มีการแก้ไขข้อมูลหรือเลือกรูปไว้ ต้องการปิดหน้าต่างโดยไม่บันทึกใช่หรือไม่?')) {
+        return;
+      }
       document.getElementById('jobModal').classList.add('hidden');
       document.getElementById('jobForm').reset();
       compressedBase64 = '';
+      isModalDirty = false;
     }
 
     async function previewSelectedImage(event) {
@@ -680,6 +710,7 @@
 
       try {
         compressedBase64 = await compressImage(file, 1024, 0.7);
+        isModalDirty = true;
         document.getElementById('editImagePreview').src = compressedBase64;
         document.getElementById('imagePreviewContainer').classList.remove('hidden');
       } catch (err) {
@@ -752,6 +783,7 @@
         });
         const result = await response.json();
         if (result.status === 'success') {
+          isModalDirty = false;
           closeModal();
           fetchJobs();
         } else {
@@ -777,6 +809,7 @@
         });
         const result = await response.json();
         if (result.status === 'success') {
+          isModalDirty = false;
           closeModal();
           fetchJobs();
         } else {
