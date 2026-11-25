@@ -52,12 +52,10 @@
           <span class="text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 truncate">📌 Tracking Job</span>
           
           <div class="flex items-center gap-2 sm:gap-3">
-            <!-- 🌙 Toggle Dark Mode -->
-            <button onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm" title="สลับธีม">
               <span id="themeIcon">🌙</span>
             </button>
 
-            <!-- 📜 ปุ่มดู Audit Log (แสดงเฉพาะ Admin) -->
             <button id="logBtn" onclick="openLogModal()" class="hidden text-slate-600 dark:text-slate-300 hover:text-indigo-600 font-medium text-xs sm:text-sm px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition">
               📜 ประวัติ
             </button>
@@ -97,11 +95,14 @@
         </div>
       </div>
 
-      <!-- 👥 สรุปภาระงานรายบุคคล -->
+      <!-- สรุปภาระงานรายบุคคล (คลิกเพื่อกรองงานตามรายชื่อได้) -->
       <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm mb-6">
-        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-1.5">
-          <span>👥</span> สรุปภาระงานรายบุคคล (ทั้งหมด / ค้างอยู่)
-        </h3>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+            <span>👥</span> สรุปภาระงานรายบุคคล (คลิกเพื่อกรองตามคน)
+          </h3>
+          <span class="text-[11px] text-slate-400">*งานที่มีผู้รับผิดชอบหลายคนจะนับรวมให้แต่ละคนที่ถูกเลือก</span>
+        </div>
         <div id="assigneeStatsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4"></div>
       </div>
 
@@ -109,11 +110,10 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">รายการงานทั้งหมด</h2>
-          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">*งานที่ยังไม่ระบุคนจะอยู่ด้านบนสุด</p>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">*งานที่ยังไม่เสร็จและยังไม่ระบุคนจะอยู่ด้านบนสุด</p>
         </div>
 
         <div class="flex gap-2">
-          <!-- 📊 ปุ่ม Export CSV -->
           <button onclick="exportToCSV()" class="w-1/2 sm:w-auto inline-flex items-center justify-center gap-1 bg-slate-700 hover:bg-slate-800 text-white font-medium px-3.5 py-2.5 rounded-lg shadow-sm transition text-xs sm:text-sm">
             <span>📥</span> Export CSV
           </button>
@@ -125,20 +125,33 @@
       </div>
 
       <!-- Search & Filter Bar -->
-      <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 flex flex-col sm:flex-row gap-3">
+      <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-4 flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-sm">🔍</span>
-          <input type="text" id="searchInput" oninput="handleSearchAndFilter()" placeholder="ค้นหา Job ID, หัวข้อ, หรือผู้รับผิดชอบ..." class="w-full pl-9 pr-4 py-2.5 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+          <input type="text" id="searchInput" oninput="handleSearchAndFilter()" placeholder="ค้นหา Job ID, หัวข้อ, หรือผู้รับผิดชอบ..." class="w-full pl-9 pr-8 py-2.5 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+          <button type="button" id="clearSearchBtn" onclick="clearFilters()" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold">✕</button>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">สถานะ:</span>
           <select id="statusFilter" onchange="handleSearchAndFilter()" class="w-full sm:w-auto border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
             <option value="ALL">ทั้งหมด</option>
+            <option value="OVERDUE">⚠️ เลยกำหนดส่ง (ยังไม่เสร็จ)</option>
             <option value="Pending">Pending</option>
             <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
           </select>
         </div>
+      </div>
+
+      <!-- Filter Status Summary Strip -->
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4 text-xs text-slate-500 dark:text-slate-400 px-1">
+        <div id="activeFilterInfo" class="flex flex-wrap items-center gap-2">
+          <span>แสดงผล: <strong id="resultCountText" class="text-slate-700 dark:text-slate-200">0</strong> รายการ</span>
+          <span id="activeMemberBadge" class="hidden bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-medium"></span>
+        </div>
+        <button type="button" id="resetFilterLink" onclick="clearFilters()" class="hidden text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
+          ล้างตัวกรองทั้งหมด
+        </button>
       </div>
 
       <!-- Job Cards Grid -->
@@ -258,9 +271,15 @@
     let allJobs = [];
     let currentUser = null;
     let compressedBase64 = '';
+    let selectedMemberFilter = '';
     const TEAM_MEMBERS = ["ฉัตรชัย", "ศรานนท์", "จิรวัฒณ์", "ชัยวัตน์"];
 
-    // 🌙 Dark Mode Toggle
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      });
+    }
+
     function toggleDarkMode() {
       const html = document.documentElement;
       if (html.classList.contains('dark')) {
@@ -301,7 +320,6 @@
           document.getElementById('currentUserDisplay').innerText = currentUser.name;
           document.getElementById('currentRoleDisplay').innerText = `Role: ${currentUser.role}`;
 
-          // แสดงปุ่มดู Audit Log หากเป็น Admin
           if (currentUser.role === 'Admin') {
             document.getElementById('logBtn').classList.remove('hidden');
           } else {
@@ -324,6 +342,7 @@
 
     function handleLogout() {
       currentUser = null;
+      selectedMemberFilter = '';
       document.getElementById('loginForm').reset();
       document.getElementById('appSection').classList.add('hidden');
       document.getElementById('loginSection').classList.remove('hidden');
@@ -359,11 +378,23 @@
         const memberJobs = allJobs.filter(j => (j.Assignee || '').includes(member));
         const total = memberJobs.length;
         const pending = memberJobs.filter(j => j.Status === 'Pending' || j.Status === 'In Progress').length;
+        const isSelected = selectedMemberFilter === member;
 
-        const card = document.createElement('div');
-        card.className = `p-3 rounded-lg border text-xs sm:text-sm ${pending > 0 ? 'bg-indigo-50/40 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800' : 'bg-slate-50 dark:bg-slate-700/40 border-slate-200 dark:border-slate-700'}`;
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.onclick = () => toggleMemberFilter(member);
+        card.className = `text-left p-3 rounded-lg border text-xs sm:text-sm transition cursor-pointer ${
+          isSelected
+            ? 'bg-indigo-50 dark:bg-indigo-900/50 border-indigo-500 ring-2 ring-indigo-300 dark:ring-indigo-700'
+            : (pending > 0
+                ? 'bg-indigo-50/40 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400'
+                : 'bg-slate-50 dark:bg-slate-700/40 border-slate-200 dark:border-slate-700 hover:border-slate-300')
+        }`;
         card.innerHTML = `
-          <p class="font-bold text-slate-800 dark:text-slate-200 truncate">${member}</p>
+          <div class="flex items-center justify-between gap-1">
+            <p class="font-bold text-slate-800 dark:text-slate-200 truncate">${member}</p>
+            ${isSelected ? '<span class="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded">กรองอยู่</span>' : ''}
+          </div>
           <div class="mt-1 flex justify-between text-slate-600 dark:text-slate-400 text-[11px] sm:text-xs">
             <span>ทั้งหมด: <strong class="text-indigo-600 dark:text-indigo-400">${total}</strong></span>
             <span>ค้าง: <strong class="text-amber-600 dark:text-amber-400">${pending}</strong></span>
@@ -373,28 +404,82 @@
       });
     }
 
+    function toggleMemberFilter(member) {
+      selectedMemberFilter = (selectedMemberFilter === member) ? '' : member;
+      updateAssigneeStats();
+      handleSearchAndFilter();
+    }
+
     function filterByStatus(status) {
       document.getElementById('statusFilter').value = status;
+      handleSearchAndFilter();
+    }
+
+    function isJobOverdue(job, today) {
+      let displayDueDate = job.DueDate || '';
+      if (displayDueDate.includes('T')) displayDueDate = displayDueDate.split('T')[0];
+      if (!displayDueDate || job.Status === 'Completed') return false;
+      const dDate = new Date(displayDueDate);
+      dDate.setHours(0, 0, 0, 0);
+      return dDate < today;
+    }
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = 'ALL';
+      selectedMemberFilter = '';
+      updateAssigneeStats();
       handleSearchAndFilter();
     }
 
     function handleSearchAndFilter() {
       const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
       const statusValue = document.getElementById('statusFilter').value;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', !searchText);
 
       const filteredJobs = allJobs.filter(job => {
-        const matchSearch = (job.Job_ID || '').toLowerCase().includes(searchText) ||
+        const matchSearch = !searchText ||
+                            (job.Job_ID || '').toLowerCase().includes(searchText) ||
                             (job.Title || '').toLowerCase().includes(searchText) ||
                             (job.Assignee || '').toLowerCase().includes(searchText) ||
                             (job.Requester || '').toLowerCase().includes(searchText);
-        const matchStatus = (statusValue === 'ALL') || (job.Status === statusValue);
-        return matchSearch && matchStatus;
+
+        let matchStatus = true;
+        if (statusValue === 'OVERDUE') {
+          matchStatus = isJobOverdue(job, today);
+        } else if (statusValue !== 'ALL') {
+          matchStatus = (job.Status === statusValue);
+        }
+
+        const matchMember = !selectedMemberFilter || (job.Assignee || '').includes(selectedMemberFilter);
+
+        return matchSearch && matchStatus && matchMember;
       });
 
-      renderJobs(filteredJobs);
+      const hasActiveFilter = Boolean(searchText || statusValue !== 'ALL' || selectedMemberFilter);
+      document.getElementById('resetFilterLink').classList.toggle('hidden', !hasActiveFilter);
+
+      const memberBadge = document.getElementById('activeMemberBadge');
+      if (selectedMemberFilter) {
+        memberBadge.innerText = `ผู้รับผิดชอบ: ${selectedMemberFilter}`;
+        memberBadge.classList.remove('hidden');
+      } else {
+        memberBadge.classList.add('hidden');
+      }
+
+      document.getElementById('resultCountText').innerText = filteredJobs.length;
+      renderJobs(filteredJobs, today);
     }
 
-    function renderJobs(jobsToRender) {
+    function renderJobs(jobsToRender, today = null) {
+      if (!today) {
+        today = new Date();
+        today.setHours(0, 0, 0, 0);
+      }
+
       const jobListContainer = document.getElementById('jobList');
       jobListContainer.innerHTML = '';
 
@@ -403,14 +488,12 @@
         return;
       }
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
+      // ดันเฉพาะงานที่ยังไม่เสร็จ (Status !== 'Completed') และยังไม่ระบุผู้รับผิดชอบขึ้นด้านบนสุด
       const sortedJobs = [...jobsToRender].sort((a, b) => {
         const assigneeA = (a.Assignee || '').trim();
         const assigneeB = (b.Assignee || '').trim();
-        const isUnassignedA = !assigneeA || assigneeA === 'ไม่ระบุ' || assigneeA === '-';
-        const isUnassignedB = !assigneeB || assigneeB === 'ไม่ระบุ' || assigneeB === '-';
+        const isUnassignedA = (!assigneeA || assigneeA === 'ไม่ระบุ' || assigneeA === '-') && a.Status !== 'Completed';
+        const isUnassignedB = (!assigneeB || assigneeB === 'ไม่ระบุ' || assigneeB === '-') && b.Status !== 'Completed';
 
         if (isUnassignedA && !isUnassignedB) return -1;
         if (!isUnassignedA && isUnassignedB) return 1;
@@ -418,29 +501,24 @@
       });
 
       sortedJobs.forEach(job => {
-        const isUnassigned = !job.Assignee || job.Assignee === 'ไม่ระบุ' || job.Assignee === '-';
+        const rawAssignee = (job.Assignee || '').trim();
+        const isUnassigned = !rawAssignee || rawAssignee === 'ไม่ระบุ' || rawAssignee === '-';
         const hasImage = job.Image_URL && job.Image_URL.trim() !== '';
 
         let displayDueDate = job.DueDate || '';
         if (displayDueDate.includes('T')) displayDueDate = displayDueDate.split('T')[0];
 
-        // 🚨 Check งานเกินกำหนดส่ง (Due Date Alert)
-        let isOverdue = false;
-        if (displayDueDate && job.Status !== 'Completed') {
-          const dDate = new Date(displayDueDate);
-          dDate.setHours(0, 0, 0, 0);
-          if (dDate < today) isOverdue = true;
-        }
+        const overdue = isJobOverdue(job, today);
 
         const card = document.createElement('div');
-        card.className = `bg-white dark:bg-slate-800 rounded-xl shadow-sm border ${isOverdue ? 'border-red-500 bg-red-50/30 dark:bg-red-950/20' : (isUnassigned ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700')} p-4 sm:p-5 flex flex-col justify-between`;
+        card.className = `bg-white dark:bg-slate-800 rounded-xl shadow-sm border ${overdue ? 'border-red-500 bg-red-50/30 dark:bg-red-950/20' : (isUnassigned && job.Status !== 'Completed' ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700')} p-4 sm:p-5 flex flex-col justify-between`;
 
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-3">
               <span class="text-[11px] font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-600">${job.Job_ID}</span>
               <div class="flex gap-1">
-                ${isOverdue ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">⚠️ เลยกำหนด</span>' : ''}
+                ${overdue ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">⚠️ เลยกำหนด</span>' : ''}
                 <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${getStatusBadgeClass(job.Status)}">${job.Status}</span>
               </div>
             </div>
@@ -450,7 +528,7 @@
             <div class="text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-4">
               <p>👤 ผู้รับผิดชอบ: <span class="${isUnassigned ? 'text-red-500 font-bold' : 'font-medium text-slate-800 dark:text-slate-200'}">${isUnassigned ? '⚠️ ไม่ระบุ' : job.Assignee}</span></p>
               ${job.Requester ? `<p class="text-slate-500 dark:text-slate-400">🙋‍♂️ ผู้แจ้ง: ${job.Requester}</p>` : ''}
-              ${displayDueDate ? `<p class="${isOverdue ? 'text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400'}">📅 กำหนดส่ง: ${displayDueDate}</p>` : ''}
+              ${displayDueDate ? `<p class="${overdue ? 'text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400'}">📅 กำหนดส่ง: ${displayDueDate}</p>` : ''}
             </div>
           </div>
 
@@ -473,7 +551,6 @@
       return 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
     }
 
-    // 📊 ฟังก์ชัน Export ข้อมูลเป็นไฟล์ CSV
     function exportToCSV() {
       if (allJobs.length === 0) {
         alert('ไม่มีข้อมูลสำหรับ Export');
@@ -481,7 +558,7 @@
       }
 
       const headers = ['Job_ID', 'Title', 'Requester', 'Assignee', 'Status', 'DueDate', 'Details'];
-      let csvContent = "\uFEFF"; // UTF-8 BOM สำหรับภาษาไทยใน Excel
+      let csvContent = "\uFEFF";
       csvContent += headers.join(",") + "\n";
 
       allJobs.forEach(j => {
@@ -507,7 +584,6 @@
       document.body.removeChild(link);
     }
 
-    // 📜 Audit Log Modal Logic
     async function openLogModal() {
       try {
         const response = await fetch(`${WEB_APP_URL}?action=getLogs`);
@@ -581,7 +657,6 @@
         imgPreviewContainer.classList.add('hidden');
       }
 
-      // 🔒 สิทธิ์การใช้งาน: เฉพาะ Admin เท่านั้นที่เห็นปุ่มลบงาน
       if (currentUser && currentUser.role === 'Admin') {
         document.getElementById('deleteBtn').classList.remove('hidden');
       } else {
